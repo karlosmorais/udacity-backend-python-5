@@ -1,5 +1,10 @@
 import boto3
 import time
+import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 cf = boto3.client('cloudformation', region_name='us-east-2')
 
@@ -9,19 +14,19 @@ template_body = open('ci-cd-codepipeline.cfn.yml', 'r').read()
 params = [
     {
         'ParameterKey': 'GitHubToken',
-        'ParameterValue': 'param'
+        'ParameterValue': os.getenv('GITHUB_TOKEN')
     },
     {
         'ParameterKey': 'GitHubUser',
-        'ParameterValue': 'karlosmorais'
+        'ParameterValue': os.getenv('GITHUB_USER')
     },
     {
         'ParameterKey': 'GitSourceRepo',
-        'ParameterValue': 'udacity-backend-python-5'
+        'ParameterValue': os.getenv('GITHUB_REPO')
     },
     {
         'ParameterKey': 'GitBranch',
-        'ParameterValue': 'main'
+        'ParameterValue': os.getenv('GITHUB_BRANCH')
     }
 ]
 

@@ -1,8 +1,13 @@
 import requests
 import json
+import os
+from dotenv import load_dotenv
 
-url = "https://api.github.com/repos/karlosmorais/udacity-backend-python-5"
-auth = ("karlosmorais", "token")
+# Load environment variables from .env file
+load_dotenv()
+
+url = f"https://api.github.com/repos/{os.getenv('GITHUB_USER')}/{os.getenv('GITHUB_REPO')}"
+auth = (os.getenv('GITHUB_USER'), os.getenv('GITHUB_TOKEN'))
 
 try:
     response = requests.get(url, auth=auth)
