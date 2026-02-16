@@ -25,9 +25,9 @@ phases:
       - ./kubectl version --client
       - python -m pip install --upgrade --force pip
       - wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | apt-key add
-      - rm -f /etc/apt/sources.list.d/corretto.list
+      - rm -rf /etc/apt/sources.list.d/*
       - apt-get update -y || true
-      - apt-get -y install jq
+      - apt-get -y install jq || echo "jq install failed, will use python for token"
       - pip install --upgrade awscli pytest
   pre_build:
     commands:
@@ -51,7 +51,8 @@ phases:
       - aws eks update-kubeconfig --name $EKS_CLUSTER_NAME --role-arn $EKS_KUBECTL_ROLE_ARN
       - echo "Applying manifest with token..."
       - cat simple_jwt_api.yml
-      - KUBE_TOKEN=$(aws eks get-token --cluster-name $EKS_CLUSTER_NAME --role-arn $EKS_KUBECTL_ROLE_ARN | jq -r '.status.token')
+      - KUBE_TOKEN=$(aws eks get-token --cluster-name $EKS_CLUSTER_NAME --role-arn $EKS_KUBECTL_ROLE_ARN | python -c "import sys, json; print(json.load(sys.stdin)['status']['token'])")
+      - echo "Applying manifest with token (length ${#KUBE_TOKEN})..."
       - ./kubectl apply -f simple_jwt_api.yml --token $KUBE_TOKEN
       - printf '[{"name":"simple_jwt_api","imageUri":"%s"}]' $REPOSITORY_URI:$TAG > build.json
 artifacts:
