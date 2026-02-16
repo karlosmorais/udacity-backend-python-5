@@ -10,7 +10,7 @@ phases:
       - echo 'about to call dockerd'
       - nohup /usr/local/bin/dockerd --host=unix:///var/run/docker.sock --host=tcp://127.0.0.1:2375 --storage-driver=overlay2&
       - timeout 15 sh -c "until docker info; do echo .; sleep 1; done"
-      - echo 'Modernizing EKS authentication...'
+      - curl -sS -o aws-iam-authenticator https://s3.us-west-2.amazonaws.com/amazon-eks/1.27.9/2024-01-04/bin/linux/amd64/aws-iam-authenticator
       # Download the latest stable release kubectl      
       # - curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
       # You must use a kubectl version that is within one minor version difference of your Amazon EKS cluster control plane. 
