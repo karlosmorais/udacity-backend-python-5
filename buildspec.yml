@@ -34,7 +34,7 @@ phases:
       - pip install -r requirements.txt
       - python -m pytest test_main.py
       - TAG="$REPOSITORY_NAME.$REPOSITORY_BRANCH.$ENVIRONMENT_NAME.$(date +%Y-%m-%d.%H.%M.%S).$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | head -c 8)"
-      - sed -i 's@CONTAINER_IMAGE@'"$REPOSITORY_URI:$TAG"'@' simple_jwt_api.yml
+      - python -c "import os; data = open('simple_jwt_api.yml').read(); data = data.replace('CONTAINER_IMAGE', os.environ['REPOSITORY_URI'] + ':' + os.environ['TAG']); open('simple_jwt_api.yml', 'w').write(data)"
       - $(aws ecr get-login --no-include-email)
       - export KUBECONFIG=$HOME/.kube/config
       - echo `ls -l`
@@ -49,11 +49,10 @@ phases:
       - echo $EKS_KUBECTL_ROLE_ARN
       - aws sts get-caller-identity
       - aws eks update-kubeconfig --name $EKS_CLUSTER_NAME --role-arn $EKS_KUBECTL_ROLE_ARN
-      - echo "Applying manifest with token..."
       - cat simple_jwt_api.yml
       - KUBE_TOKEN=$(aws eks get-token --cluster-name $EKS_CLUSTER_NAME --role-arn $EKS_KUBECTL_ROLE_ARN | python -c "import sys, json; print(json.load(sys.stdin)['status']['token'])")
       - echo "Applying manifest with token (length ${#KUBE_TOKEN})..."
-      - ./kubectl apply -f simple_jwt_api.yml --token $KUBE_TOKEN
+      - ./kubectl apply -f simple_jwt_api.yml --token $KUBE_TOKEN 2>&1
       - printf '[{"name":"simple_jwt_api","imageUri":"%s"}]' $REPOSITORY_URI:$TAG > build.json
 artifacts:
   files: build.json
