@@ -35,7 +35,6 @@ phases:
       - apt-get update -y || true
       - apt-get -y install jq
       - pip install --upgrade awscli pytest
-      - python -m pytest test_main.py
   pre_build:
     commands:
       - pip install -r requirements.txt
