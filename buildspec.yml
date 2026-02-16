@@ -31,8 +31,11 @@ phases:
       - echo `kubectl version --short --client`
       - python -m pip install --upgrade --force pip
       - wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | apt-key add
-      - rm -f /etc/apt/sources.list.d/yarn.list /etc/apt/sources.list.d/corretto.list || true
-      - apt-get update && apt-get -y install jq  && pip install --upgrade awscli pytest && python -m pytest test_main.py
+      - rm -f /etc/apt/sources.list.d/corretto.list
+      - apt-get update -y || true
+      - apt-get -y install jq
+      - pip install --upgrade awscli pytest
+      - python -m pytest test_main.py
   pre_build:
     commands:
       - pip install -r requirements.txt
